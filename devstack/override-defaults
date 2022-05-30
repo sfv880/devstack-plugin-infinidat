@@ -1,0 +1,4 @@
+TEMPEST_BACKUP_DRIVER="cinder.backup.drivers.posix.PosixBackupDriver"
+TEMPEST_VOLUME_DRIVER="cinder.volume.drivers.infinidat.InfiniboxVolumeDriver"
+TEMPEST_VOLUME_VENDOR="INFINIDAT"
+TEMPEST_STORAGE_PROTOCOL="$INFINIDAT_STORAGE_PROTOCOL"

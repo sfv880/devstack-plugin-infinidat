@@ -1,0 +1,9 @@
+# Devstack settings
+
+define_plugin devstack-plugin-infinidat
+plugin_requires devstack-plugin-infinidat cinder
+
+# INFINIDAT_PLUGIN_DIR contains the path to devstack-plugin-infinidat/devstack directory
+INFINIDAT_PLUGIN_DIR=$(readlink -f $(dirname ${BASH_SOURCE[0]}))
+
+source $INFINIDAT_PLUGIN_DIR/lib/infinidat

@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+#
+# lib/infinidat
+# Functions to control the configuration
+# and operation of the **Infinidat** storage service
+#
+# ``stack.sh`` calls the entry points in this order:
+#
+# - install_infinidat_dependencies
+# - configure_infinidat_cinder
+# - configure_infinidat_tempest
+# - uninstall_infinidat_dependencies
+
+# Save trace setting
+XTRACE=$(set +o | grep xtrace)
+set +o xtrace
+
+# Functions
+# ---------
+
+function install_infinidat_dependencies {
+    pip_install infinisdk
+}
+
+function configure_infinidat_cinder {
+    local INFINIDAT_PREFIX="INFINIDAT_BACKEND_"
+    local BACKEND_PAIR
+    for BACKEND_PAIR in ${CINDER_ENABLED_BACKENDS//,/ }; do
+        local BACKEND_TYPE=${BACKEND_PAIR%%:*}
+        local BACKEND_NAME=${BACKEND_PAIR##*:}
+        if [[ "$BACKEND_TYPE" == "infinidat" ]]; then
+            local BACKEND_PREFIX="${INFINIDAT_PREFIX}${BACKEND_NAME}_"
+            local OPTION_ITEM
+            iniset "$CINDER_CONF" "$BACKEND_NAME" volume_driver \
+                "$TEMPEST_VOLUME_DRIVER"
+            iniset "$CINDER_CONF" "$BACKEND_NAME" volume_backend_name \
+                "$BACKEND_NAME"
+            for OPTION_ITEM in $(set | grep "^$BACKEND_PREFIX"); do
+                local OPTION_PAIR="${OPTION_ITEM#$BACKEND_PREFIX}"
+                local OPTION_NAME="${OPTION_PAIR%%=*}"
+                local OPTION_VALUE="${OPTION_PAIR##*=}"
+                iniset "$CINDER_CONF" "$BACKEND_NAME" "$OPTION_NAME" \
+                    "$OPTION_VALUE"
+            done
+        fi
+    done
+
+    install -d "$CINDER_STATE_PATH/backup"
+    iniset $CINDER_CONF DEFAULT backup_file_size 134217728
+    iniset $CINDER_CONF DEFAULT backup_sha_block_size_bytes 32768
+    iniset $CINDER_CONF DEFAULT backup_driver "$TEMPEST_BACKUP_DRIVER"
+    iniset $CINDER_CONF DEFAULT backup_posix_path "$CINDER_STATE_PATH/backup"
+
+    iniset $NOVA_CONF libvirt volume_use_multipath True
+    iniset $NOVA_CPU_CONF libvirt volume_use_multipath True
+}
+
+function configure_infinidat_tempest {
+    iniset $TEMPEST_CONFIG compute-feature-enabled attach_encrypted_volume True
+    iniset $TEMPEST_CONFIG volume-feature-enabled extend_attached_volume True
+
+    # CINDER-223 Tempest test suite: failed to backup attached volume
+    iniset $TEMPEST_CONFIG volume-feature-enabled backup False
+
+    # CINDER-222 Tempest test suite: failed to migrate volume
+    iniset $TEMPEST_CONFIG volume-feature-enabled multi_backend False
+
+    # CINDER-220 Add revert to snapshot feature
+    iniset $TEMPEST_CONFIG volume-feature-enabled volume_revert False
+
+    # CINDER-236 Multiattach feature is broken
+    iniset $TEMPEST_CONFIG compute-feature-enabled volume_multiattach False
+
+    # CINDER-246 Add import/export volumes feature
+    iniset $TEMPEST_CONFIG volume-feature-enabled manage_volume False
+
+    # CINDER-247 Add import/export snapshots feature
+    iniset $TEMPEST_CONFIG volume-feature-enabled manage_snapshot False
+}
+
+function uninstall_infinidat_dependencies {
+    pip_uninstall infinisdk
+}
+
+# Restore xtrace
+$XTRACE
+
+## Local variables:
+## mode: shell-script
