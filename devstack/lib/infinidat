@@ -45,7 +45,8 @@ function configure_infinidat_cinder {
         fi
     done
 
-    install -d "$CINDER_STATE_PATH/backup"
+    install -v -d "$CINDER_STATE_PATH/backup"
+
     iniset $CINDER_CONF DEFAULT backup_file_size 134217728
     iniset $CINDER_CONF DEFAULT backup_sha_block_size_bytes 32768
     iniset $CINDER_CONF DEFAULT backup_driver "$TEMPEST_BACKUP_DRIVER"
@@ -57,25 +58,26 @@ function configure_infinidat_cinder {
 
 function configure_infinidat_tempest {
     iniset $TEMPEST_CONFIG compute-feature-enabled attach_encrypted_volume True
+    iniset $TEMPEST_CONFIG compute_feature_enabled block_migration_for_live_migration True
+    iniset $TEMPEST_CONFIG compute_feature_enabled live_migration True
+    iniset $TEMPEST_CONFIG compute_feature_enabled live_migrate_back_and_forth True
+    iniset $TEMPEST_CONFIG compute_feature_enabled resize True
+    iniset $TEMPEST_CONFIG compute_feature_enabled shelve_migrate True
+    iniset $TEMPEST_CONFIG compute_feature_enabled stable_rescue True
+    iniset $TEMPEST_CONFIG compute_feature_enabled swap_volume True
+    iniset $TEMPEST_CONFIG compute-feature-enabled volume_multiattach True
+
+    iniset $TEMPEST_CONFIG volume-feature-enabled backup True
+    iniset $TEMPEST_CONFIG volume-feature-enabled consistency_group True
+    iniset $TEMPEST_CONFIG volume-feature-enabled extend_attached_encrypted_volume True
     iniset $TEMPEST_CONFIG volume-feature-enabled extend_attached_volume True
+    iniset $TEMPEST_CONFIG volume-feature-enabled manage_snapshot True
+    iniset $TEMPEST_CONFIG volume-feature-enabled manage_volume True
+    iniset $TEMPEST_CONFIG volume-feature-enabled multi_backend True
+    iniset $TEMPEST_CONFIG volume-feature-enabled volume_revert True
 
-    # CINDER-223 Tempest test suite: failed to backup attached volume
-    iniset $TEMPEST_CONFIG volume-feature-enabled backup False
-
-    # CINDER-222 Tempest test suite: failed to migrate volume
-    iniset $TEMPEST_CONFIG volume-feature-enabled multi_backend False
-
-    # CINDER-220 Add revert to snapshot feature
-    iniset $TEMPEST_CONFIG volume-feature-enabled volume_revert False
-
-    # CINDER-236 Multiattach feature is broken
-    iniset $TEMPEST_CONFIG compute-feature-enabled volume_multiattach False
-
-    # CINDER-246 Add import/export volumes feature
-    iniset $TEMPEST_CONFIG volume-feature-enabled manage_volume False
-
-    # CINDER-247 Add import/export snapshots feature
-    iniset $TEMPEST_CONFIG volume-feature-enabled manage_snapshot False
+    iniset $TEMPEST_CONFIG volume manage_snapshot_ref 'source-name, openstack-snap-%s'
+    iniset $TEMPEST_CONFIG volume manage_volume_ref 'source-name, openstack-vol-%s'
 }
 
 function uninstall_infinidat_dependencies {
