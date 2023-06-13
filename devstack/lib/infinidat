@@ -74,7 +74,7 @@ function configure_infinidat_tempest {
     iniset $TEMPEST_CONFIG volume-feature-enabled manage_snapshot False
     iniset $TEMPEST_CONFIG volume-feature-enabled manage_volume False
     iniset $TEMPEST_CONFIG volume-feature-enabled multi_backend False
-    iniset $TEMPEST_CONFIG volume-feature-enabled volume_revert True
+    iniset $TEMPEST_CONFIG volume-feature-enabled volume_revert False
 
     iniset $TEMPEST_CONFIG volume manage_snapshot_ref 'source-name, openstack-snap-%s'
     iniset $TEMPEST_CONFIG volume manage_volume_ref 'source-name, openstack-vol-%s'
