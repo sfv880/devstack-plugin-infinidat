@@ -52,8 +52,8 @@ function configure_infinidat_cinder {
     iniset $CINDER_CONF DEFAULT backup_driver "$TEMPEST_BACKUP_DRIVER"
     iniset $CINDER_CONF DEFAULT backup_posix_path "$CINDER_STATE_PATH/backup"
 
-    iniset $NOVA_CONF libvirt volume_use_multipath True
-    iniset $NOVA_CPU_CONF libvirt volume_use_multipath True
+#    iniset $NOVA_CONF libvirt volume_use_multipath True
+#    iniset $NOVA_CPU_CONF libvirt volume_use_multipath True
 }
 
 function configure_infinidat_tempest {
