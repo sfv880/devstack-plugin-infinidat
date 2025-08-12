@@ -57,7 +57,7 @@ function configure_infinidat_cinder {
 }
 
 function configure_infinidat_tempest {
-    iniset $TEMPEST_CONFIG compute-feature-enabled attach_encrypted_volume True
+#    iniset $TEMPEST_CONFIG compute-feature-enabled attach_encrypted_volume True
     iniset $TEMPEST_CONFIG compute_feature_enabled block_migration_for_live_migration True
     iniset $TEMPEST_CONFIG compute_feature_enabled live_migration True
     iniset $TEMPEST_CONFIG compute_feature_enabled live_migrate_back_and_forth True
